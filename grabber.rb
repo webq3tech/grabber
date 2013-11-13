@@ -58,6 +58,8 @@ class Grabber
       self.grabber_site = get_grabber_site
 
       parse_for grabber_site
+
+      self.query_hash = nil
     end
   end
 
@@ -67,7 +69,7 @@ class Grabber
   private
 
   def fetch_url
-    puts "Grabbing URL - #{url}"
+    # puts "Grabbing URL - #{url}"
     return Nokogiri::HTML(open(url))
   end
 
