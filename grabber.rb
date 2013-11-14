@@ -160,9 +160,12 @@ class Grabber
   end
 
   def get_key
-    key = grabber_site.to_s + "_" + query_hash["cl"].first if grabber_site == :thiecom
-    key = :funktechnik_bielefeld_detail if grabber_site == :funktechnik_bielefeld && query_hash.nil?
-    key = :funktechnik_bielefeld_search if grabber_site == :funktechnik_bielefeld && !query_hash.nil?
+    # key = grabber_site.to_s + "_" + query_hash["cl"].first if grabber_site == :thiecom
+    # key = :funktechnik_bielefeld_detail if grabber_site == :funktechnik_bielefeld && query_hash.nil?
+    # key = :funktechnik_bielefeld_search if grabber_site == :funktechnik_bielefeld && !query_hash.nil?
+
+    key = :funktechnik_bielefeld_detail if grabber_site == :funktechnik_bielefeld
+    key = :thiecom_details if grabber_site == :thiecom
 
     return key
   end
@@ -171,24 +174,57 @@ end
 
 system("clear")
 
-urls = [
-  "http://www.thiecom.de/index.php?sid=d1213bfa6787f43bedf299c75a4d4801&cl=details&anid=aa1519f4c402aa215.43759963&listtype=search&searchparam=ftdx1200",
-  "http://www.thiecom.de/index.php?sid=105b4ec3b7697e9dddc7bbecdce95791&cl=search&searchparam=ftdx1200",
-  "http://www.funktechnik-bielefeld.de/yaesu-ft-dx5000.html",
-  "http://www.funktechnik-bielefeld.de/catalogsearch/result/?q=FT-DX5000"
-]
+# urls = [
+#   "http://www.thiecom.de/index.php?sid=56740ce86478d870dc4d0a623ba5002e&cl=details&anid=ca749ac40c12fbea6.16258412&listtype=search&searchparam=IC7600",
+#   # "http://www.thiecom.de/index.php?sid=105b4ec3b7697e9dddc7bbecdce95791&cl=search&searchparam=ftdx1200",
+#   "http://www.funktechnik-bielefeld.de/icom-ic-7600.html"
+#   # "http://www.funktechnik-bielefeld.de/catalogsearch/result/?q=FT-DX5000"
+# ]
+
+products = [
+      {
+        name: "FTDX-1200",
+        urls: []
+      },
+      {
+        name: "FTDX-5000",
+        urls: []
+      },
+      {
+        name: "X-50N",
+        urls: []
+      },
+      {
+        name: "IC-7600",
+        urls: [
+          "http://www.thiecom.de/index.php?sid=56740ce86478d870dc4d0a623ba5002e&cl=details&anid=ca749ac40c12fbea6.16258412&listtype=search&searchparam=IC7600",
+          "http://www.funktechnik-bielefeld.de/icom-ic-7600.html"
+        ]
+      },
+      {
+        name: "TS-480SAT",
+        urls: [
+          "http://www.thiecom.de/kenwood-ts480sat.html",
+          "http://www.funktechnik-bielefeld.de/kenwood-ts-480sat.html"
+        ]
+      }
+    ]
 
 CSV.open("result.csv", "wb") do |csv|
   csv << ["Index", "Product", "Matched Title", "Price", "url"]
 
-  products = ["FTDX-1200", "FTDX-5000", "X-50N", "IC-7600", "TS-480SAT"].each_with_index do |product, index|
+  fetched_product_count = 1
+  products.each do |product|
+    puts "Fetching - #{product[:name]}"
     grabber = Grabber.new(
-        urls:         urls,
-        product:      product,
-        index_value:  index + 1,
+        urls:         product[:urls],
+        product:      product[:name],
+        index_value:  fetched_product_count,
         csv:          csv
       )
-
-    grabber.parse
+    if product[:urls].size > 0
+      grabber.parse
+      fetched_product_count += 1
+    end
   end
 end
